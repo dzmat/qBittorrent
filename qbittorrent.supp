@@ -1,0 +1,10 @@
+{
+   operator new(unsigned int)[Memcheck:Leak]
+   Memcheck:Leak
+   fun:_Znwj
+   fun:_ZN7QObjectC1EPS_
+   fun:_ZN9StatusBarC1EP10QStatusBar
+   fun:_ZN10MainWindowC1EP7QWidget
+   fun:_ZN11Application4execERK11QStringList
+   fun:main
+}
