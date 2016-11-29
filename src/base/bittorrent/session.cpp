@@ -3860,6 +3860,8 @@ void Session::readAlerts()
     for (const auto a: alerts) {
         handleAlert(a);
 #if LIBTORRENT_VERSION_NUM < 10100
+#pragma warning test
+
         delete a;
 #endif
     }
