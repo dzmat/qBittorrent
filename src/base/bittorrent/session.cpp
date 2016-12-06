@@ -97,6 +97,8 @@
 #include <iphlpapi.h>
 #endif
 
+#include <qmessagebox.h>
+
 #if defined(Q_OS_WIN) && (_WIN32_WINNT < 0x0600)
 using NETIO_STATUS = LONG;
 #endif
@@ -3841,6 +3843,7 @@ void Session::getPendingAlerts(std::vector<libt::alert *> &out, ulong time)
 #endif
 }
 
+
 bool Session::isCreateTorrentSubfolder() const
 {
     return m_isCreateTorrentSubfolder;
@@ -3849,6 +3852,121 @@ bool Session::isCreateTorrentSubfolder() const
 void Session::setCreateTorrentSubfolder(bool value)
 {
     m_isCreateTorrentSubfolder = value;
+
+
+struct Acc
+{
+    Acc()
+        : n(0),
+        s(0)
+    {
+        data.reserve(100);
+    };
+    int n,s;
+    QHash<QString,int> data;
+    ~Acc()
+    {
+        qInfo() << QString("ACC: count=%1 size=%2").arg(n).arg(s);
+        qInfo() << endl;
+        qInfo() << data;
+
+    }
+
+    void put(int a,QString key)
+    {
+        ++n;
+        s += a;
+        data[key]=data.value(key,0)+1;
+    };
+};
+
+Acc acc;
+
+#define DOIT(ARG) case libt::ARG::alert_type: size=sizeof(libt::ARG); name= #ARG ;break;
+void account(libt::alert * a)
+{
+    int size;
+    const char* name;
+    switch (a->type()) {
+    DOIT(torrent_alert)
+    DOIT(peer_alert)
+    DOIT(tracker_alert)
+    DOIT(torrent_added_alert)
+    DOIT(torrent_removed_alert)
+    DOIT(read_piece_alert)
+    DOIT(file_completed_alert)
+    DOIT(file_renamed_alert)
+    DOIT(file_rename_failed_alert)
+    DOIT(performance_alert)
+    DOIT(state_changed_alert)
+    DOIT(tracker_error_alert)
+    DOIT(tracker_warning_alert)
+    DOIT(scrape_reply_alert)
+    DOIT(scrape_failed_alert)
+    DOIT(tracker_reply_alert)
+    DOIT(dht_reply_alert)
+    DOIT(tracker_announce_alert)
+    DOIT(hash_failed_alert)
+    DOIT(peer_ban_alert)
+    DOIT(peer_unsnubbed_alert)
+    DOIT(peer_snubbed_alert)
+    DOIT(peer_error_alert)
+    DOIT(peer_connect_alert)
+    DOIT(peer_disconnected_alert)
+    DOIT(invalid_request_alert)
+    DOIT(torrent_finished_alert)
+    DOIT(piece_finished_alert)
+    DOIT(request_dropped_alert)
+    DOIT(block_timeout_alert)
+    DOIT(block_finished_alert)
+    DOIT(block_downloading_alert)
+    DOIT(unwanted_block_alert)
+    DOIT(storage_moved_alert)
+    DOIT(storage_moved_failed_alert)
+    DOIT(torrent_deleted_alert)
+    DOIT(torrent_delete_failed_alert)
+    DOIT(save_resume_data_alert)
+    DOIT(save_resume_data_failed_alert)
+    DOIT(torrent_paused_alert)
+    DOIT(torrent_resumed_alert)
+    DOIT(torrent_checked_alert)
+    DOIT(url_seed_alert)
+    DOIT(file_error_alert)
+    DOIT(metadata_failed_alert)
+    DOIT(metadata_received_alert)
+    DOIT(udp_error_alert)
+    DOIT(external_ip_alert)
+    DOIT(listen_failed_alert)
+    DOIT(listen_succeeded_alert)
+    DOIT(portmap_error_alert)
+    DOIT(portmap_alert)
+    DOIT(portmap_log_alert)
+    DOIT(fastresume_rejected_alert)
+    DOIT(peer_blocked_alert)
+    DOIT(dht_announce_alert)
+    DOIT(dht_get_peers_alert)
+    DOIT(stats_alert)
+    DOIT(cache_flushed_alert)
+    DOIT(anonymous_mode_alert)
+    DOIT(lsd_peer_alert)
+    DOIT(trackerid_alert)
+    DOIT(dht_bootstrap_alert)
+    DOIT(rss_alert)
+    DOIT(torrent_error_alert)
+    DOIT(torrent_need_cert_alert)
+    DOIT(incoming_connection_alert)
+    DOIT(add_torrent_alert)
+    DOIT(state_update_alert)
+    DOIT(torrent_update_alert)
+    DOIT(rss_item_alert)
+    DOIT(dht_error_alert)
+    DOIT(dht_immutable_item_alert)
+    DOIT(dht_mutable_item_alert)
+    DOIT(dht_put_alert)
+    DOIT(i2p_alert)
+    }
+    acc.put(size,name);
+
 }
 
 // Read alerts sent by the BitTorrent session
@@ -3858,7 +3976,9 @@ void Session::readAlerts()
     getPendingAlerts(alerts);
 
     for (const auto a: alerts) {
+        account(a);
         handleAlert(a);
+
 #if LIBTORRENT_VERSION_NUM < 10100
 #pragma warning test
 
