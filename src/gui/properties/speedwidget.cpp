@@ -60,7 +60,7 @@ SpeedWidget::SpeedWidget(PropertiesWidget *parent)
 {
     m_layout = new QVBoxLayout(this);
     m_layout->setContentsMargins(0, 0, 0, 0);
-
+    QMenu* p=new QMenu();//test of vagrind
     m_hlayout = new QHBoxLayout();
     m_hlayout->setContentsMargins(0, 0, 0, 0);
 
