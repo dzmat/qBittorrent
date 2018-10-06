@@ -40,7 +40,10 @@
 #include "base/bittorrent/session.h"
 #include "base/bittorrent/sessionstatus.h"
 #include "base/preferences.h"
+#include "base/logger.h"
 #include "propertieswidget.h"
+#include <x86intrin.h>
+
 
 ComboBoxMenuButton::ComboBoxMenuButton(QWidget *parent, QMenu *menu)
     : QComboBox(parent)
@@ -135,6 +138,8 @@ void SpeedWidget::update()
 {
     const BitTorrent::SessionStatus &btStatus = BitTorrent::Session::instance()->status();
 
+    quint64 t1 = __rdtsc();
+
     SpeedPlotView::PointData point;
     point.x = QDateTime::currentMSecsSinceEpoch() / 1000;
     point.y[SpeedPlotView::UP] = btStatus.uploadRate;
@@ -150,6 +155,11 @@ void SpeedWidget::update()
 
     m_plot->pushPoint(point);
     m_plot->replot();
+
+
+    quint64 rt = __rdtsc() - t1;
+    QString msg = QString("rdtsc = %1").arg(rt);
+    LogMsg(msg);
 }
 
 void SpeedWidget::onPeriodChange(int period)
